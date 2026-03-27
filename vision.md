@@ -4,7 +4,7 @@ Unifying Heterogeneous Computing and Breaking the Memory Wall
 
 The computing industry is currently shifting from monolithic chip designs to chiplet-based,heterogeneous clusters.
 However, a unified language to manage these diverse cores (AMD/x86, ARM, RISC-V) at the core level is missing.
-OOI (Object Oriented Interface) is proposed as an open-standard interface designed
+OOI (Open Offload Interface) is proposed as an open-standard interface designed
 to unite these architectures under a single software-defined fabric.
 
 By democratizing high-end compute power and reimagining memory management,
@@ -18,20 +18,22 @@ A central goal of OOI is to bridge the gap between different hardware vendors.
 
     The OOI Solution: OOI acts as a "diplomatic layer" at the core level. Whether the underlying hardware is an AMD CPU, an ARM core, or a RISC-V accelerator, the system sees a unified pool of "Throughput Units."
 
-    Performance Parity: The vision suggests that 4 to 16 high-end mobile SoCs, linked via OOI, could match the performance of a flagship discrete GPU (like an RTX 5090), but with higher efficiency and lower cost.
+    Performance Parity: The vision suggests that 4 to 16 high-end mobile SoCs, linked via OOI, could match the performance of a flagship discrete GPU (like an RTX 5090), but with higher efficiency and lower cost,
+    and the option to have more as VRAM usable Memory to offload.
 
 3. Breaking the "Memory Wall"
 
 One of the greatest bottlenecks in modern AI (LLMs) is VRAM limitation. OOI addresses this through a native 3-Tier Memory Model:
 
-    FastRAM (L1/L2): High-speed on-chip memory for immediate calculations.
+    FastRAM (L0 scratch/L1 onboard Ram): High-speed on-chip memory for immediate calculations.
 
-    RAM Banks (L3): System-level memory for active model weights.
+    RAM Banks (L2): System-level memory for active model weights.
 
-    SSD/Flash (Streaming Level): Persistent storage used as an extended memory pool.
+    SSD/Flash (L3 Streaming Level): Persistent storage used as an extended memory pool.
 
 The "Streaming Mode" Innovation:
 Unlike traditional systems where a model "crashes" if it exceeds VRAM, OOI utilizes a native streaming_mode. The OOI fabric controller pre-fetches layers from the SSD into RAM and then into FastRAM in the background. This allows consumer hardware to run multi-terabyte models by "streaming" the weights through the compute units.
+
 4. Strategic Market Positioning
 
 OOI is not just a technical specification; it is a strategic move to challenge existing monopolies (specifically Nvidia’s CUDA).
