@@ -30,8 +30,6 @@ The complete technical specification can be found here:
 5. Deterministic Execution Model
 6. Example Use Case (Real-Time Rendering)
 
-## 🤝 Contributing
-*(Add your contribution guidelines here for the Git release)*
 
 ## 📄 License
-*(Add your chosen license here, e.g., MIT, Apache 2.0)*
+ Apache 2.0
