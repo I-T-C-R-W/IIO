@@ -27,6 +27,8 @@ All results are returned through shared memory without exposing internal routing
 
 ### 12.2 Discovery Phase
 At initialization, the front TPU performs OOI discovery across the internal fabric.
+The system behavior is defined entirely by the discovered capability map.
+No static configuration is required.
 
 **Flow:**
 `Front TPU` → `DISCOVER` → `Fabric` → `Devices` → `RESPONSES` → `Aggregation`
