@@ -1,6 +1,6 @@
 # OOI Extension: Heterogeneous System Behavior
 
-OOI enables heterogeneous compute systems to behave like a single deterministic device with multi-tier memory and capability-based scheduling.
+OOI enables heterogeneous compute systems to behave like a single deterministic device with multi-tier memory and capability-based scheduling and allows heterogeneous hardware to behave as a single deterministic system, eliminating the need for explicit hardware management in applications.
 
 ---
 
