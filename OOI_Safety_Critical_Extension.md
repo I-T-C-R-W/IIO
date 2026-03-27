@@ -1,1 +1,1 @@
-placeholder for industrial extensions - safepath & encryption 
+placeholder for industrial extensions - safepath 
