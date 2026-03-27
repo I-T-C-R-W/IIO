@@ -9,6 +9,17 @@ OOI enables heterogeneous compute systems to behave like a single deterministic 
 ### 12.1 System Entry Point
 The system exposes a single logical device to the operating system. All interaction is performed through a front-facing accelerator (TPU-class device) implementing the OOI interface.
 
+--Example:
+
+A rendering workload is submitted by the OS.
+
+The front TPU receives the job and distributes:
+- geometry processing to throughput nodes
+- dynamic shading to flexible units (GPU)
+- post-processing to deterministic units
+
+All results are returned through shared memory without exposing internal routing.
+-- 
 **Communication Path:**
 `OS` → `Driver` → `Front TPU` → `OOI Fabric` → `Internal Devices`
 
