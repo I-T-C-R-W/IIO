@@ -1,47 +1,32 @@
-# OOI Extension: Heterogeneous System Behavior
+## 12. Example Use Case – Heterogeneous Device (Front Device + Fabric)
 
-OOI enables heterogeneous compute systems to behave like a single deterministic device with multi-tier memory and capability-based scheduling and allows heterogeneous hardware to behave as a single deterministic system, eliminating the need for explicit hardware management in applications.
+OOI defines a model where heterogeneous compute systems behave as a single deterministic device, independent of internal topology.
 
 ---
 
-## 12. Example Use Case – Heterogeneous Device (Front TPU + Nodes + GPU)
-
 ### 12.1 System Entry Point
-The system exposes a single logical device to the operating system. All interaction is performed through a front-facing accelerator (TPU-class device) implementing the OOI interface.
+The system exposes a single logical device to the operating system. All interaction is performed through a front-facing device (e.g., TPU-class accelerator) implementing the OOI interface.
 
---Example:
+```text
+OS → Driver → Front Device → OOI Fabric → Internal Devices
+```
 
-A rendering workload is submitted by the OS.
+*Note: The operating system is not aware of internal structure or topology.*
 
-The front TPU receives the job and distributes:
-- geometry processing to throughput nodes
-- dynamic shading to flexible units (GPU)
-- post-processing to deterministic units
-
-All results are returned through shared memory without exposing internal routing.
--- 
-**Communication Path:**
-`OS` → `Driver` → `Front TPU` → `OOI Fabric` → `Internal Devices`
-
-*Note: The operating system is not aware of the internal topology.*
-
-### 12.2 Discovery Phase
-At initialization, the front TPU performs OOI discovery across the internal fabric.
-The system behavior is defined entirely by the discovered capability map.
-No static configuration is required.
+### 12.2 Discovery
+At initialization, the front device performs OOI discovery across the fabric.
 
 **Flow:**
-`Front TPU` → `DISCOVER` → `Fabric` → `Devices` → `RESPONSES` → `Aggregation`
+`Front Device` → `DISCOVER` → `Fabric` → `Devices` → `RESPONSES` → `Aggregation`
 
-**Discovered devices may include:**
-* Throughput nodes (ALU clusters)
-* External accelerators (e.g., GPUs)
-* Additional specialized units
-
-Each internal device provides a standard OOI capability block.
+Devices compliant with OOI respond with capability descriptions. Discovered devices may include:
+* **Throughput-oriented nodes:** (e.g., ALU clusters)
+* **Flexible accelerators:** (e.g., GPUs)
+* **Deterministic units:** (e.g., TPU pipelines)
+* **Specialized resources:** Additional compute-specific hardware
 
 ### 12.3 Capability Aggregation
-The front TPU aggregates all responses into a unified capability map that defines the global behavior of the system.
+The front device aggregates all responses into a unified capability map. System behavior is defined entirely by this map; no static hardware configuration is required.
 
 **Example Aggregated Map:**
 ```text
@@ -65,7 +50,7 @@ access_modes {
 ```
 
 ### 12.4 OS Exposure
-The driver exposes a single, unified device profile to the kernel. No internal device identifiers or bus addresses are exposed.
+The driver exposes a single logical device profile. Internal devices are hidden, and no guarantees are made about individual device identity or physical execution paths.
 
 ```text
 DEVICE {
@@ -75,57 +60,39 @@ DEVICE {
 }
 ```
 
-### 12.5 Execution Flow
+### 12.5 Execution Model
+Workloads are submitted through standard APIs:
+`dispatch(workload)`
 
-**Step 1 – Work Submission**
-The application submits work via a standard API:
-```c
-dispatch(workload)
-```
+The front device schedules execution based on capability classes:
+* **deterministic_units** → fixed pipeline execution
+* **flexible_units** → dynamic or branching workloads
+* **throughput_units** → bulk processing
 
-**Step 2 – Scheduling**
-The front TPU schedules tasks based on capability classes:
-* `deterministic_units` → fixed pipeline execution
-* `flexible_units` → dynamic or branching workloads (e.g., GPU)
-* `throughput_units` → bulk processing (nodes)
+External accelerators are treated as capability providers, not primary devices. They extend the system but do not define it.
 
-**Step 3 – Data Placement**
-Data is distributed across memory tiers automatically:
-* **L1:** Active working sets (local ram)
-* **L2:** Shared data (system fabric ram)
-* **L3:** Streaming resources (storage/nvme)
-* *Prefetching ensures availability before execution.*
+### 12.6 Memory Model
+Data is distributed across memory tiers. Memory placement is implementation-defined and not exposed to the application.
 
-**Step 4 – Offload**
-External accelerators are used as specialized execution targets:
-```text
-if workload.type == flexible:
-    assign_to_gpu()
-else:
-    assign_to_nodes()
-```
-Offload is handled transparently through the OOI protocol.
+* **L1:** Active working sets
+* **L2:** Shared system memory
+* **L3:** Streaming and background data
+* *Prefetching ensures data availability prior to execution.*
 
-**Step 5 – Execution**
-Execution follows a controlled, non-blocking model:
-* **Deterministic mode:** Fixed dataflow patterns.
-* **Streaming mode:** Continuous processing.
-* **Sync mode:** Coordinated updates when required.
-* *No direct inter-device synchronization is exposed to the application.*
+### 12.7 Execution Flow Example
+A rendering workload is submitted. The front device assigns:
+* **Geometry processing** to throughput units.
+* **Dynamic shading** to flexible units.
+* **Post-processing** to deterministic units.
 
-**Step 6 – Result Integration**
-Results are written back to shared memory (L2) and assembled. The front TPU returns the final output to the OS as a single completed task.
+Results are written to shared memory and assembled before being returned. All execution paths are abstracted from the application.
 
-### 12.6 Properties
-* **Single logical device abstraction:** Simplifies software stack.
-* **Hidden internal topology:** Enhances security and hardware independence.
-* **Capability-based scheduling:** Optimizes workload-to-hardware matching.
-* **Multi-tier memory utilization:** Maximizes bandwidth efficiency.
-* **Deterministic execution:** Provides predictable performance for real-time tasks.
+### 12.8 Properties
+* **Single logical device abstraction**
+* **Hidden internal topology**
+* **Capability-based scheduling**
+* **Multi-tier memory utilization**
+* **Deterministic or near-deterministic execution**
 
-### 12.7 Summary
-This example demonstrates a system where the operating system interacts only with a front TPU device,
-while the underlying fabric dynamically integrates nodes and external accelerators.
-All internal complexity is abstracted through OOI,
-allowing heterogeneous hardware to behave as a unified,
-deterministic compute system.
+### 12.9 Summary
+OOI enables heterogeneous compute resources to operate as a unified system. Applications interact with a single device, while internal complexity is fully abstracted through capability-driven discovery and scheduling.
