@@ -1,259 +1,37 @@
-Open Offload Interface (OOI)
-Discovery and Capability Specification
-Draft v0.1
-1. Scope
+# Open Offload Interface (OOI)
 
-This specification defines a minimal protocol for the discovery and description of compute resources in heterogeneous systems.
+[![Version](https://img.shields.io/badge/version-v0.1_Draft-blue.svg)](Spec.md)
+[![Repository](https://img.shields.io/badge/github-I--T--C--R--W%2FOOI-black?logo=github)](https://github.com/I-T-C-R-W/OOI)
 
-The goal is to provide a vendor-neutral abstraction layer that describes device behavior rather than hardware implementation,
-enabling deterministic and scalable multi-layer compute systems.
+Welcome to the **Open Offload Interface (OOI)** repository. 
 
-2. Design Principles
-Behavior-oriented abstraction
-Minimal core specification with extensibility
-Deterministic capability description
-Vendor neutrality
-Forward compatibility
-3. Discovery Flow
-INIT → DISCOVER → RESPONSE → CAPABILITY MAP → DRIVER INITIALIZATION → OS EXPOSURE
-3.1 INIT
+OOI defines a minimal, vendor-neutral protocol for the discovery and description of compute resources in heterogeneous systems. By describing device *behavior* rather than hardware *implementation*, OOI enables the creation of deterministic, scalable, and multi-layer compute systems.
 
-The controller initializes the interconnect and prepares for device discovery.
+## 🎯 Vision & Scope
+Modern compute architectures consist of diverse processing units and complex memory hierarchies. OOI provides an abstraction layer that allows these heterogeneous systems to present themselves as a **single logical device** to the operating system, while internally coordinating multiple compute classes and memory tiers. Applications remain unaware of the underlying complexity, while the runtime ensures efficient and predictable execution.
 
-3.2 DISCOVER
+## 📐 Design Principles
+* **Behavior-oriented abstraction:** Focus on what a component does, not how it is built.
+* **Minimal core specification:** Keep the core lightweight with clear extensibility.
+* **Deterministic capability description:** Predictable latency, memory access, and execution.
+* **Vendor neutrality:** Hardware agnostic design.
+* **Forward compatibility:** Safe extension mechanisms for future technologies.
 
-The controller broadcasts a discovery request to all connected devices:
+## 📄 Documentation
 
-DISCOVER_REQUEST {
-  version
-  requested_fields
-}
-3.3 RESPONSE
+The complete technical specification can be found here:
+👉 **[Read the OOI Specification (Spec.md)](Spec.md)**
 
-Each device responds with its identity and capability block:
+### Table of Contents (Spec)
+1. Scope & Design Principles
+2. Discovery Flow
+3. Capability Block Definition
+4. Map Aggregation & OS Exposure
+5. Deterministic Execution Model
+6. Example Use Case (Real-Time Rendering)
 
-DISCOVER_RESPONSE {
-  device_id
-  device_class
-  capability_block
-}
-4. Capability Block
-4.1 Compute Classes
-compute {
-  deterministic_units: integer
-  flexible_units: integer
-  throughput_units: integer
-}
+## 🤝 Contributing
+*(Add your contribution guidelines here for the Git release)*
 
-Definitions:
-
-deterministic_units: compute elements with predictable latency and execution behavior
-flexible_units: compute elements optimized for dynamic or branching workloads
-throughput_units: compute elements optimized for batch and high-volume workloads
-4.2 Memory Model
-memory {
-  L1 {
-    size
-    latency_class
-  }
-  L2 {
-    size
-    bandwidth_class
-  }
-  L3 {
-    size
-    streaming: boolean
-  }
-}
-
-Latency and bandwidth are expressed as classes rather than fixed values.
-
-4.3 Access Modes
-access_modes {
-  deterministic_mode: boolean
-  streaming_mode: boolean
-  sync_mode: boolean
-}
-4.4 Scheduling Capabilities
-scheduling {
-  partitioning: boolean
-  prefetch: boolean
-  reduction: boolean
-  priority_levels: integer
-}
-4.5 Offload Interface
-offload {
-  accepts_jobs: boolean
-  preferred_job_size: small | medium | large
-  latency_profile: low | medium | high
-}
-4.6 Performance Envelope
-performance {
-  compute_class: low | mid | high
-  efficiency_class: low | mid | high
-}
-5. Capability Map Aggregation
-
-The controller aggregates all device responses into a unified capability map:
-
-CAPABILITY_MAP {
-  global_compute
-  global_memory
-  available_modes
-  device_groups
-}
-6. Driver Responsibilities
-
-The driver is responsible for:
-
-Interpreting the capability map
-Grouping compute resources by behavior
-Selecting scheduling strategies
-Exposing a unified device abstraction to the operating system
-7. OS Exposure Model
-
-The operating system is presented with a single logical device:
-
-DEVICE {
-  compute_profile
-  memory_profile
-  supported_modes
-}
-
-Internal topology and individual nodes are not exposed.
-
-8. Deterministic Execution Model
-
-A device is considered deterministic when:
-
-execution modes are explicitly defined
-memory access patterns are controlled and predictable
-scheduling avoids unbounded dynamic behavior
-9. Extension Mechanism
-extensions {
-  vendor_specific: optional
-  future_fields: allowed
-}
-
-Unknown fields must be safely ignored.
-
-10. Versioning
-version: major.minor
-Major versions introduce breaking changes
-Minor versions introduce backward-compatible extensions
-11. Summary
-
-This specification defines a minimal framework for describing heterogeneous compute systems based on behavior,
-capability, and execution characteristics. It enables the construction of deterministic,
-multi-layer compute platforms while maintaining compatibility across diverse hardware implementations.
-
-12. Example Use Case
-12.1 System Overview
-
-A heterogeneous compute device consists of:
-
-A front-facing accelerator (TPU-class device) acting as the primary interface
-Multiple compute nodes providing throughput-oriented execution
-Optional external accelerators (e.g. discrete GPUs)
-A multi-tier memory system:
-L1: local memory per node
-L2: shared system memory
-L3: optional streaming storage
-
-All components are connected through a fabric controlled by an OOI-compliant controller.
-
-12.2 Discovery Phase
-
-At system initialization:
-
-The controller broadcasts a discovery request
-Each device responds with its capability block
-The controller aggregates responses into a unified capability map
-
-Example aggregated capability:
-
-compute {
-  deterministic_units: 8
-  flexible_units: 1024
-  throughput_units: 32
-}
-
-memory {
-  L1: 32 GB   # fastram
-  L2: 32 GB   # slowram
-  L3: 512 GB (streaming) # nvme
-}
-
-access_modes {
-  deterministic_mode: true
-  streaming_mode: true
-  sync_mode: true
-}
-12.3 OS Exposure
-
-The driver exposes a single logical device to the operating system:
-
-DEVICE {
-  compute_profile: mixed
-  memory_profile: multi-tier
-  supported_modes: deterministic, streaming
-}
-
-The internal topology is not visible to the OS or applications.
-
-12.4 Workload: Real-Time Rendering
-
-A rendering workload is submitted through a standard graphics API.
-
-Step 1: Resource Allocation
-
-The application allocates memory without specifying placement:
-
-allocate_resources(scene_data, textures, buffers)
-
-The driver distributes data across memory tiers:
-
-Frequently accessed data → L1
-Shared assets → L2
-Streaming assets → L3
-Step 2: Workload Partitioning
-
-The driver partitions the workload into tiles or batches and assigns tasks based on capability:
-
-Deterministic units → fixed pipeline stages
-Flexible units → dynamic shading or branching tasks
-Throughput units → bulk processing
-Step 3: Execution
-
-The system operates in deterministic mode:
-
-Data is prefetched from L2 into L1
-Compute nodes process workloads in a streaming pipeline
-External accelerators may receive large, self-contained jobs
-
-No direct node-to-node synchronization is exposed.
-
-Step 4: Data Movement
-Results are written to L2 in a controlled manner
-L3 is used only for background streaming
-Memory access follows predefined patterns to avoid contention
-Step 5: Output
-
-Final results are assembled and returned through the front-facing accelerator.
-
-The application receives the completed frame without awareness of the internal distribution.
-
-12.5 Properties
-
-This execution model provides:
-
-Deterministic or near-deterministic execution behavior
-Predictable memory access patterns
-Efficient utilization of heterogeneous compute resources
-Transparent abstraction of underlying hardware
-12.6 Summary
-
-This use case demonstrates how OOI enables a heterogeneous system 
-to present itself as a single logical device while internally coordinating multiple compute
-classes and memory tiers. Applications remain unaware of the underlying complexity,
-while the runtime ensures efficient and predictable execution.
+## 📄 License
+*(Add your chosen license here, e.g., MIT, Apache 2.0)*
