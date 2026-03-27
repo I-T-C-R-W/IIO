@@ -1,5 +1,6 @@
 White Paper: The OOI Vision
-Unifying Heterogeneous Computing and Breaking the Memory Wall
+Unifying Heterogeneous Computing and Breaking the Memory Wall.
+
 „OOI is designed to be the glue between architectures.“
 1. Executive Summary
 
