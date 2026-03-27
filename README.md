@@ -1,4 +1,6 @@
 # Open Offload Interface (OOI)
+<img width="1024" height="1024" alt="Generated Image March 27, 2026 - 10_33AM" src="https://github.com/user-attachments/assets/dc858664-7dca-49f5-ae17-8642312c612b" />
+
 
 [![Version](https://img.shields.io/badge/version-v0.1_Draft-blue.svg)](Spec.md)
 [![Repository](https://img.shields.io/badge/github-I--T--C--R--W%2FOOI-black?logo=github)](https://github.com/I-T-C-R-W/OOI)
